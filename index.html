@@ -1,0 +1,274 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="jQuery Tutorials">
+        <meta name="viewport" content="width=device-width, intial-scale=0">
+        <title>Weather</title>
+        <script src="jquery.js"></script>
+        <style>
+            body
+            {
+                font-size: 24px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                color: white;
+                background-color: black;
+                
+            }
+            .container, .container1
+            {
+                display: flex;
+                justify-content: left;
+                padding-bottom: 10pt;
+                flex-direction: column;
+                box-sizing: border-box;
+                width: 100%;
+                height: 500px;
+                padding-bottom:20px;
+                border : 10px solid white;
+            }
+            .container .details
+            {
+                padding-left: 70px; 
+                padding-bottom:2px;
+            }
+            .container .weather
+            {
+                padding-left: 70px;
+                font-size: 18px;
+            }
+            h1{
+                background-color: cornflowerblue;
+                text-align: center;
+                padding: 0px 30px 0px 30px;
+                margin: 20px 10px 10px;
+            }
+            .drop
+            {
+               padding-left: 30px;
+               font-size: 20px;
+            }
+            .required .city2
+            {
+                z-index:2;
+            }
+        </style>
+    </head>
+    <body>
+        <body>
+            <h1>Weather</h1>
+            <div class="gridcontainer">
+                <div class='container'>
+                <div class="details"> 
+                    <h1>Current Location Weather</h1>
+                    <span class="date"></span>
+                    <h2 class="city"></h2>
+                   
+                </div>
+                <div class="weather">
+                    <p class="tempq"></p>
+                    <span class="tempq1"></span>
+                </div>
+                </div>
+                <div class='container1'>
+                <h1>Required Location Weather</h1>
+                    <p>Select Required City</p>
+                    <select class="drop down">
+                        <label for='city'>Choose city:</label>
+                            <option value="Coimbatore">Covai</option>
+                            <option value="Chennai">Chennai</option>
+                            <option value="Kochi">Kochi</option>
+                            <option value="Mumbai">Mumbai</option>
+                            <option value="Bangalore">Bangalore</option>
+                    </select>
+                            <input class ="sub" type="submit" value="Submit">
+                    <div class="required weather">
+                        <span class="date2"></span>
+                        <h2 class="city2"></h2>
+                    </div>
+                    <div class="weather2">
+                        <p class="tempq12"></p>
+                        <span class="tempq2"></span>
+                    </div>
+                </div>
+            </div>
+        </body>
+        
+        <script>
+            navigator.geolocation.getCurrentPosition(position =>
+            {
+            });
+           function formatAMPM(date) {
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var ampm = hours >= 12 ? 'pm' : 'am';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                var strTime = hours + ':' + minutes + ' ' + ampm;
+                return strTime;
+            }   
+                var date = new Date();
+                    months = new Array('Jan', 'Feb', 'Mar', 'Apr', 'May',   'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+                    curMonth = months[date.getMonth()];
+                    curdate = String(date.getDate()).padStart(2, '0');
+                    date_d = curMonth + " " + curdate + ", " + formatAMPM(date);
+                
+                $(document).ready(function()
+                    {  
+                       
+                        $('.sub').click(function()
+                        {
+                            var qcity = $('.drop').eq(0).val();
+                            console.log(qcity);
+                        $.ajax({
+                            url:'http://api.openweathermap.org/data/2.5/weather?q=' + String(qcity) + '&appid=f847023ac7fd05f740bd61dc050203fe',
+                            type:'GET',
+                            dataType:'json',
+                            timeout:2500,
+                            success: function (data) {
+                                var $degree = (data['main']['temp']);
+                                var $val = parseInt($degree - (273.15));
+                                var $val = String($val);
+                                var $clim = data['weather']['0']['main'];
+                                var $place = data['name'];
+                                var $country = data['sys']['country'];
+								$('p.tempq12').remove();
+                                $('.weather2').append('<p class="tempq12">'+$val + '&deg;C'+'</p>');
+								$('span.tempq2').remove();
+                                $('.weather2').append('<span class="tempq2"> Feels Like ' + $val + '&deg;C.&emsp; ' + $clim+'</span>');
+                                $('h2').remove();
+								$('.weather2').append('<h2 class="city2">'+$place + ', ' + $country+'</h2>').css('font-weight', '20px');
+                            },
+                            error: function (result) {
+                                console.log('error');
+                            },
+                            complete: function () {
+                                console.log('complete');
+                            }
+
+                        });
+                    });
+
+                        $('.date').text(date_d).css('color','red'); 
+                        $('.date2').text(date_d).css('color', 'red'); 
+                        navigator.geolocation.getCurrentPosition(success, error);
+                        function success(position){
+                            var latitude = position.coords.latitude;
+                            var longitude = position.coords.longitude;
+                        $.ajax({
+                            url:'http://api.openweathermap.org/data/2.5/weather?lat='+ (latitude)+'&lon=' + (longitude) + '&appid=f847023ac7fd05f740bd61dc050203fe',
+                            type:'GET',
+                            dataType:'json',
+                            timeout:2500,
+                            success: function(data){
+                                
+                                var $degree =(data['main']['temp']);
+                                var $val =  parseInt( $degree - (273.15));
+                                var $val = String($val);
+                                var $clim = data['weather']['0']['main'];
+                                var $place = data['name'];
+                                var $country = data['sys']['country'];
+                                $('.tempq').append($val+'&deg;C');
+                                $('.tempq1').append('Feels Like '+$val+'&deg;C.&emsp; '+$clim);
+                                $('.city').append($place+', '+$country).css('font-weight','20px');
+                                
+                            },
+                            error: function(result){
+                                console.log('error');
+                            },
+                            complete:function(){
+                                console.log('complete');
+                            }
+                        });
+                    }
+                    function error(err) {/* geolocation error callback */
+                        console.log(err);
+                    }
+                }
+                );
+                    
+        
+        </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+    <!-- <body>
+        <div id="example">y</div>
+        <div id="exam1">exam</div>
+        <a href="google.com" target="_self">google
+        </a> -->
+        <!-- <div id="contentmanipulation">
+            <p id="question">what is x?</p>
+            <input type="text" name="name" id="answer-box">
+            <p id="res"></p>
+            <p id="ans"></p>
+            <button type="submit">Submit</button>
+        </div> -->
+        <!-- <a href="google.com" target="_self">Google</a>
+        <a href="yahoo.com" target="_blank">Yahoo</a>
+        <button id="link" type="submit">Submit</button>
+        <ul id="list">
+            <li>hi</li>
+            <li>h2</li>
+            <li>h3</li>
+        </ul>
+        <script src="./jquery.js"></script>
+        <script>
+            function handlePermission() {
+                    navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+                        if (result.state == 'granted') {
+                            report(result.state);
+                            geoBtn.style.display = 'none';
+                        } else if (result.state == 'prompt') {
+                            report(result.state);
+                            geoBtn.style.display = 'none';
+                            navigator.geolocation.getCurrentPosition(revealPosition, positionDenied, geoSettings);
+                        } else if (result.state == 'denied') {
+                            report(result.state);
+                            geoBtn.style.display = 'inline';
+                        }
+                        result.onchange = function () {
+                            report(result.state);
+                        }
+                    });
+                }
+
+                function report(state) {
+                    console.log('Permission ' + state);
+                }
+
+                handlePermission(); -->
+            <!-- //       $("#link").click(function(){
+            //         $('a').attr('target',"_blank");
+            //       })
+            // 
+            // var a=[1,2,3,4];
+            // $.each(a, function(index,value){
+            //     console.log(index,value);
+            // })
+            // $('li').each(function(index,vaue){
+            //     console.log($(this).text());});
+            
+        </script> -->
+                <!-- // $("button").click(function()
+                //     {
+                //         var answer=$('#answer-box').val();
+                //         if (answer=='dsa'){
+                //             $('#res').text("Correct");
+                //         }else{
+                //             $('#res').html('<span style="color:red">your answer is wrong</span>');
+                //             $('#ans').text("Correct ans is dsa");
+                //         }
+                //     }) -->
+ 
